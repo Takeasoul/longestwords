@@ -1,4 +1,4 @@
-tages:
+stages:
 
   - build
 
@@ -69,7 +69,6 @@ package:
     - ./cicd/package.sh
 
   artifacts:
-
     paths:
 
       - *.deb
