@@ -1,0 +1,8 @@
+Package: longest-words
+Version: 1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: KirillNikita kiry7409@gmail.com
+Depends: g++, make, libc6
+Description: Programm for finding max size word in phrase
