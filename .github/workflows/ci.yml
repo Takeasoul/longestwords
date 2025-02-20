@@ -1,74 +1,76 @@
-stages:
+name: CI/CD Pipeline
 
-  - build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-  - test
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
 
-  - package
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
- 
+      - name: Set up environment
+        run: sudo apt update && sudo apt install -y build-essential
 
-variables:
+      - name: Build the project
+        run: |
+          chmod +x cicd/build.sh
+          ./cicd/build.sh
 
-  PACKAGE_NAME: "longest-words"
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary
+          path: usr/bin/longest_words
 
-  VERSION: "1.0"
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
 
- 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-# Этап сборки
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: binary
 
-build:
+      - name: Test the project
+        run: |
+          chmod +x cicd/test.sh
+          ./cicd/test.sh
 
-  stage: build
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    needs: test
 
-  script:
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - echo "Сборка ПО"
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: binary
 
-    - chmod +x cicd/build.sh
+      - name: Package the project
+        run: |
+          chmod +x cicd/package.sh
+          ./cicd/package.sh
 
-    - ./cicd/build.sh
-
-  artifacts:
-
-    paths:
-
-      - usr/bin/longest_words
-
- 
-
-# Этап тестирования
-
-test:
-
-  stage: test
-
-  script:
-
-    - echo "Тестирование ПО"
-
-    - chmod +x cicd/test.sh
-
-    - ./cicd/test.sh
-
- 
-
-# Этап упаковки
-
-package:
-
-  stage: package
-
-  script:
-
-    - echo "Упаковка в .deb пакет"
-
-    - chmod +x cicd/package.sh
-
-    - ./cicd/package.sh
-
-  artifacts:
-    paths:
-
-      - *.deb
+      - name: Upload DEB Package
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb-package
+          path: "*.deb"
